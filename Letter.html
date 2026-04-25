@@ -1,0 +1,225 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Marleigh</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0a192f;
+            --core-blue: #112240;
+            --glow-blue: #64ffda;
+            --soft-blue: #4a90e2;
+            --silver: #e6e6e6;
+            --paper: #fdf5e6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at center, #112240 0%, #0a192f 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #particle-container { position: fixed; inset: 0; pointer-events: none; z-index: 1; }
+        .particle { position: absolute; animation: floatUp linear infinite; opacity: 0.6; }
+        @keyframes floatUp {
+            0% { transform: translateY(110vh) scale(0); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+        }
+
+        /* --- STAGE 1: LOCK (BIG & PROPER) --- */
+        #lock-stage { z-index: 100; transition: 1s cubic-bezier(0.4, 0, 0.2, 1); }
+        .heart-box { position: relative; width: 320px; height: 300px; display: flex; justify-content: center; align-items: center; filter: drop-shadow(0 0 30px rgba(100, 255, 218, 0.2)); }
+        .heart-shape { position: absolute; width: 220px; height: 220px; background: var(--core-blue); transform: rotate(-45deg); border: 3px solid var(--silver); box-shadow: inset 0 0 40px rgba(100, 255, 218, 0.1); }
+        .heart-shape::before, .heart-shape::after { content: ""; position: absolute; width: 220px; height: 220px; background: var(--core-blue); border-radius: 50%; border: 3px solid var(--silver); }
+        .heart-shape::before { top: -110px; left: 0; border-bottom: none; }
+        .heart-shape::after { top: 0; left: 110px; border-left: none; }
+        .lock-content { position: relative; z-index: 10; text-align: center; color: white; transform: translateY(-20px); }
+        .dots { display: flex; gap: 10px; justify-content: center; margin: 15px 0; }
+        .dot { width: 15px; height: 15px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 1px solid var(--silver); transition: 0.3s; }
+        .dot.active { background: var(--glow-blue); box-shadow: 0 0 15px var(--glow-blue); transform: scale(1.2); }
+        .dot.error { background: #ff4d4d; border-color: #ff4d4d; box-shadow: 0 0 15px #ff4d4d; }
+        .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 15px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        .key { width: 50px; height: 50px; border-radius: 12px; border: none; background: rgba(255, 255, 255, 0.9); color: var(--primary-blue); font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.2s; }
+        .key:active { transform: scale(0.9); background: var(--glow-blue); }
+        .shake { animation: shakeAnim 0.4s ease-in-out; }
+        @keyframes shakeAnim { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+
+        /* --- STAGE 2: ENVELOPE --- */
+        #envelope-stage { display: none; text-align: center; z-index: 50; transition: 1s; }
+        .envelope { width: 300px; height: 200px; background: #162a44; position: relative; border-radius: 0 0 10px 10px; cursor: pointer; margin: 0 auto; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .flap { position: absolute; top: 0; left: 0; border-left: 150px solid transparent; border-right: 150px solid transparent; border-top: 110px solid #1e3c5a; transform-origin: top; transition: 0.8s; z-index: 2; }
+        .envelope.open .flap { transform: rotateX(180deg); }
+
+        /* --- STAGE 3: LETTER --- */
+        #letter-stage { display: none; position: fixed; inset: 0; z-index: 60; background: rgba(10, 25, 47, 0.98); flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: 1.2s; }
+        .letter-paper { background: var(--paper); width: 90%; max-width: 500px; padding: 40px 30px; box-shadow: 0 0 50px rgba(0,0,0,0.5); background-image: repeating-linear-gradient(var(--paper), var(--paper) 31px, #add8e6 31px, #add8e6 32px); line-height: 32px; }
+        .letter-content { font-family: 'Dancing Script', cursive; font-size: 1.35rem; color: #111; }
+        .letter-content p { margin-bottom: 32px; }
+        .btn-gallery { margin-top: 30px; padding: 15px 40px; background: var(--soft-blue); color: white; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+
+        /* --- STAGE 4: GALLERY --- */
+        #gallery-stage { display: none; width: 100%; height: 100%; position: fixed; top: 0; left: 0; z-index: 200; background: #fff9f0; padding: 50px; flex-direction: column; align-items: center; overflow-y: auto; opacity: 0; transition: 1s; }
+        .gallery-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 40px; padding: 50px; max-width: 1200px; }
+        .polaroid { 
+            background: white; padding: 12px 12px 50px 12px; width: 260px; 
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15); position: relative;
+            transform: rotate(var(--r)); 
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            flex-shrink: 0;
+        }
+        .polaroid:hover { transform: rotate(0deg) scale(1.1); z-index: 10; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        .polaroid img { width: 100%; height: 210px; object-fit: cover; border: 1px solid #eee; background-color: #f0f0f0; }
+        .tape { position: absolute; width: 90px; height: 30px; background: rgba(100, 255, 218, 0.3); top: -15px; left: 50%; transform: translateX(-50%) rotate(-5deg); backdrop-filter: blur(2px); }
+        .caption { font-family: 'Dancing Script'; text-align: center; margin-top: 15px; font-size: 1.4rem; color: #333; }
+    </style>
+</head>
+<body>
+
+    <audio id="clickSound" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" preload="auto"></audio>
+    <div id="particle-container"></div>
+
+    <div id="lock-stage">
+        <div class="heart-box" id="heartBox">
+            <div class="heart-shape"></div>
+            <div class="lock-content">
+                <h2 style="font-family:'Dancing Script'; font-size: 1.8rem; margin-bottom: 5px;">Secure Vault</h2>
+                <div class="dots" id="dotGroup">
+                    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                </div>
+                <div class="keypad">
+                    <script>for(let i=1;i<=9;i++)document.write(`<button class="key" onclick="press(${i})">${i}</button>`);</script>
+                    <button class="key" style="visibility:hidden"></button>
+                    <button class="key" onclick="press(0)">0</button>
+                    <button class="key" onclick="reset(true)">✕</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="envelope-stage">
+        <div class="envelope" id="env" onclick="openEnv()">
+            <div class="flap"></div>
+            <div style="position:absolute; bottom:20px; width:100%; text-align:center; color:white; font-family:'Dancing Script'; font-size:1.4rem;">Tap to open, Marleigh</div>
+        </div>
+    </div>
+
+    <div id="letter-stage">
+        <div class="letter-paper">
+            <div class="letter-content">
+                <p>Dear Marleigh,</p>
+                <p>I know po na madalang lang po tayong mag usap at magkita, but I want you to know po that I'm always right here for you. I'm always supporting and cheering you on po! Look oh, I made this virtual letter for you hehe.</p>
+                <p>Sorry po kung ito lang po ang kaya ko for now, but I promise babawi po ako sa inyo. I love you so much po! Mag-iingat po kayo palagi!!</p>
+                <p style="text-align: right; margin-bottom: 0;">-Justin💙</p>
+            </div>
+        </div>
+        <button class="btn-gallery" onclick="showGallery()">Our Memories Together Po →</button>
+    </div>
+
+    <div id="gallery-stage">
+        <h1 style="font-family: 'Playfair Display'; color: var(--primary-blue); font-size: 3rem; margin-bottom: 20px;">Our Moments Together:></h1>
+        <div class="gallery-grid">
+            <div class="polaroid" style="--r:-3deg;">
+                <div class="tape"></div>
+                <img src="https://lh3.googleusercontent.com/u/0/d/1gwDYsaWmhqXBW7Dtc-CCvjl-IlqAoy9B" alt="Us">
+                <div class="caption">Us</div>
+            </div>
+            
+            <div class="polaroid" style="--r:4deg;">
+                <div class="tape"></div>
+                <img src="https://lh3.googleusercontent.com/u/0/d/1vE8LbTAGQhRJvt3fJMlIUno7HRJyUB1h" alt="Special">
+                <div class="caption">Happy 12!</div>
+            </div>
+
+            <div class="polaroid" style="--r:-2deg;"><div class="tape"></div><img src="https://lh3.googleusercontent.com/d/149kY833_8Zj11u_B4ljwCk2KO0182ocl"><div class="caption">Bracelet</div></div>
+            <div class="polaroid" style="--r:3deg;"><div class="tape"></div><img src="https://lh3.googleusercontent.com/u/0/d/1AlRguF3S8y4uhlXVqoJ22N5lKYKnlKXK"><div class="caption">Cutie!</div></div>
+            <div class="polaroid" style="--r:-4deg;"><div class="tape"></div><img src="https://lh3.googleusercontent.com/u/0/d/1jxO-NavQ6GxnZUBlFs5x7hwocjKZTgwf"><div class="caption">Baby cute 💙</div></div>
+            <div class="polaroid" style="--r:2deg;"><div class="tape"></div><img src="https://lh3.googleusercontent.com/u/0/d/1jxO-NavQ6GxnZUBlFs5x7hwocjKZTgwf"><div class="caption">Mi Amor!:O</div></div>
+        </div>
+        <button style="padding: 10px 30px; margin-top: 40px; cursor: pointer; border-radius: 30px; background: #fff; border: 2px solid var(--primary-blue);" onclick="location.reload()">↺ Start Again</button>
+    </div>
+
+    <script>
+        const clickAudio = document.getElementById('clickSound');
+        function playClick() { clickAudio.currentTime = 0; clickAudio.play().catch(()=>{}); }
+
+        function makeParticle() {
+            const p = document.createElement('div');
+            p.className = 'particle'; p.innerHTML = ['💙','✨','❄️'][Math.floor(Math.random()*3)];
+            p.style.left = Math.random()*100+'vw'; p.style.fontSize = Math.random()*15+10+'px';
+            p.style.animationDuration = Math.random()*5+5+'s';
+            document.getElementById('particle-container').appendChild(p);
+            setTimeout(()=>p.remove(), 10000);
+        }
+        setInterval(makeParticle, 500);
+
+        let input = "";
+        function press(n) {
+            playClick();
+            if(input.length < 4) {
+                input += n;
+                updateDots();
+                if(input.length === 4) {
+                    if(input === "1913") {
+                        document.getElementById('lock-stage').style.opacity = "0";
+                        setTimeout(() => {
+                            document.getElementById('lock-stage').style.display = 'none';
+                            document.getElementById('envelope-stage').style.display = 'block';
+                        }, 1000);
+                    } else { triggerError(); }
+                }
+            }
+        }
+
+        function updateDots() {
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((d, i) => d.classList.toggle('active', i < input.length));
+        }
+
+        function triggerError() {
+            const box = document.getElementById('heartBox');
+            box.classList.add('shake');
+            document.querySelectorAll('.dot').forEach(d => d.classList.add('error'));
+            setTimeout(() => { box.classList.remove('shake'); reset(false); }, 500);
+        }
+
+        function reset(withSound) {
+            if(withSound) playClick();
+            input = "";
+            document.querySelectorAll('.dot').forEach(d => { d.classList.remove('active'); d.classList.remove('error'); });
+        }
+
+        function openEnv() {
+            document.getElementById('env').classList.add('open');
+            setTimeout(() => {
+                document.getElementById('envelope-stage').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('envelope-stage').style.display = 'none';
+                    const ls = document.getElementById('letter-stage');
+                    ls.style.display = 'flex';
+                    setTimeout(() => ls.style.opacity = '1', 100);
+                }, 1000);
+            }, 1000);
+        }
+
+        function showGallery() {
+            playClick();
+            document.getElementById('letter-stage').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('letter-stage').style.display = 'none';
+                const gs = document.getElementById('gallery-stage');
+                gs.style.display = 'flex';
+                setTimeout(() => gs.style.opacity = '1', 100);
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
